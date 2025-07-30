@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Test 4.o</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 via-white to-blue-200 min-h-screen flex items-center justify-center font-sans">
+    <div class="max-w-3xl w-full bg-white shadow-2xl rounded-3xl p-8 md:p-12 space-y-6">
+        <h1 class="text-4xl font-bold text-center text-blue-700">🧠 Typing Speed Test</h1>
+<div id="timer" class="text-center text-lg font-medium text-gray-600">
+     ⏱ Time Left: <span id="time-left">30</span>s
+</div>
+
+<div id="quote" class="text-lg md:text-xl text-gray-800 leading-relaxed break-words bg-gray-100 rounded-xl p-4 border border-gray-300"></div>
+
+<textarea id="input" rows="4" class="w-full border border-gray-300 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-gray-200" placeholder="start typing here....."></textarea>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-gray-800 font-medium">
+<div>
+    <p class="text-sm text-gray-500">WPM</p>
+    <p id="wpm" class="text-2xl font-semibold">0</p>
+</div>
+
+<div>
+    <p class="text-sm text-gray-500">Accuracy</p>
+    <p id="accuracy" class="text-2xl font-semibold">0%</p>
+
+</div>
+<div>
+    <p class="text-sm text-gray-500">✔ Correct words</p>
+    <p id="correct" class="text-2xl font-semibold">0</p>
+</div>
+<div>
+    <p class="text-sm text-gray-500">❌ Wrong Words</p>
+<p id="wrong" class="text-2xl font-semibold">0</p>
+</div>
+
+<div class="text-center pt-4">
+    <button id="restart" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+        🔁 Restart
+    </button>
+</div>
+</div>
+
+<script>
+    //basic script for the typing test
+    const quotes = [
+        "The quick brown fox jumps over the lazy dog.",
+        "A journey of a thousand miles begins with a single step.",
+        "To be or not to be, that is the question.",
+        "All that glitters is not gold.",
+        "In the middle of difficulty lies opportunity.",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+        "The only limit to our realization of tomorrow is our doubts of today.",
+        "Life is what happens when you're busy making other plans.",
+        "The purpose of our lives is to be happy.", ];
+
+
+    const quoteEl = document.getElementById("quote");
+    const inputEl = document.getElementById("input");
+    const wpmEl = document.getElementById("wpm");
+    const accuracyEl = document.getElementById("accuracy");
+    const correctEl = document.getElementById("correct");
+    const wrongEl = document.getElementById("wrong");
+    const restartBtn = document.getElementById("restart");
+    const timerEl = document.getElementById("time-left");
+
+    let timer;
+    let timeLeft = 30;
+    let timerStarted = false;
+    let quoteWords = [];
+    let interval;
+
+    function renderQuote() {
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      quoteWords = quote.trim().split(" ");
+      quoteEl.innerHTML = quoteWords.map(word => `<span class="word">${word}</span>`).join(" ");
+    }
+
+    function startTimer() {
+      interval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        if (timeLeft <= 0) finishTest();
+      }, 1000);
+    }
+
+    function finishTest() {
+      clearInterval(interval);
+      inputEl.disabled = true;
+
+      const inputText = inputEl.value.trim();
+      const inputWords = inputText.split(/\s+/);
+      let correct = 0;
+
+      inputWords.forEach((word, i) => {
+        if (word === quoteWords[i]) correct++;
+      });
+
+      const wrong = inputWords.length - correct;
+      const minutes = (30 - timeLeft) / 60;
+      const wpm = Math.round(correct / minutes);
+      const accuracy = Math.round((correct / inputWords.length) * 100);
+
+      wpmEl.textContent = isFinite(wpm) ? wpm : 0;
+      accuracyEl.textContent = isFinite(accuracy) ? `${accuracy}%` : "0%";
+      correctEl.textContent = correct;
+      wrongEl.textContent = wrong >= 0 ? wrong : 0;
+    }
+
+    function updateHighlighting() {
+      const inputText = inputEl.value.trim();
+      const inputWords = inputText.split(/\s+/);
+      const wordSpans = quoteEl.querySelectorAll(".word");
+
+      wordSpans.forEach((span, i) => {
+        const input = inputWords[i];
+        if (input == null) {
+          span.classList.remove("text-green-600", "text-red-500");
+        } else if (input === quoteWords[i]) {
+          span.classList.add("text-green-600");
+          span.classList.remove("text-red-500");
+        } else {
+          span.classList.add("text-red-500");
+          span.classList.remove("text-green-600");
+        }
+      });
+    }
+
+    inputEl.addEventListener("input", () => {
+      if (!timerStarted) {
+        timerStarted = true;
+        startTimer();
+      }
+
+      updateHighlighting();
+
+      if (inputEl.value.trim().split(/\s+/).length >= quoteWords.length) {
+        finishTest();
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      clearInterval(interval);
+      timerStarted = false;
+      timeLeft = 30;
+      timerEl.textContent = timeLeft;
+      inputEl.value = "";
+      inputEl.disabled = false;
+      wpmEl.textContent = "0";
+      accuracyEl.textContent = "0%";
+      correctEl.textContent = "0";
+      wrongEl.textContent = "0";
+      renderQuote();
+      inputEl.focus();
+    });
+
+    renderQuote();
+  </script>
+    
+</body>
+</html>
